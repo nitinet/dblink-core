@@ -1,5 +1,5 @@
-import Handler from './lib/Handler.js';
-import * as model from './lib/model/index.js';
-import * as sql from './lib/sql/index.js';
+import Handler from './src/Handler.js';
+import * as model from './src/model/index.js';
+import * as sql from './src/sql/index.js';
 export { Handler, model, sql };
 //# sourceMappingURL=index.js.map

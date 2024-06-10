@@ -11,7 +11,7 @@ class Expression implements INode {
    *
    * @type {Array<any>}
    */
-  args: Array<any> = new Array<any>();
+  args: unknown[] = [];
 
   /**
    * Value of Expression
@@ -59,7 +59,7 @@ class Expression implements INode {
       this.exps = this.exps.concat(expressions);
       return this;
     } else {
-      let exp: Expression = new Expression(null, Operator.And, this);
+      const exp: Expression = new Expression(null, Operator.And, this);
       expressions.forEach(expr => exp.add(expr));
       return exp;
     }
@@ -105,18 +105,18 @@ class Expression implements INode {
     if (this.value) {
       return this.value;
     } else {
-      let values = this.exps
+      const values = this.exps
         .map(exp => {
           if (exp) {
-            let str = exp.eval(handler);
+            const str = exp.eval(handler);
             this.args = this.args.concat(exp.args);
             return str;
           }
         })
         .filter((exp): exp is string => exp != null);
 
-      let val0: string = values[0] ? values[0] : '';
-      let val1: string = values[1] ? values[1] : '';
+      const val0: string = values[0] ? values[0] : '';
+      const val1: string = values[1] ? values[1] : '';
 
       if (!this.operator) {
         if (this.exps.length == 1) return val0;

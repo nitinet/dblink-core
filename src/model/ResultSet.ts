@@ -17,13 +17,13 @@ export default class ResultSet {
    *
    * @type {*}
    */
-  id: any = null;
+  id: unknown = null;
   /**
    * Description placeholder
    *
-   * @type {any[]}
+   * @type {Record<string, unknown>[]}
    */
-  rows: any[] = [];
+  rows: Record<string, unknown>[] = [];
   /**
    * Description placeholder
    *

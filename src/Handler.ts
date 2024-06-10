@@ -42,7 +42,10 @@ export default abstract class Handler {
    * @param {(sql.Statement | sql.Statement[])} queryStmt
    * @returns {{ query: string; dataArgs: {}; }}
    */
-  protected prepareQuery(queryStmt: sql.Statement | sql.Statement[]): { query: string; dataArgs: any[] } {
+  protected prepareQuery(queryStmt: sql.Statement | sql.Statement[]): {
+    query: string;
+    dataArgs: any[];
+  } {
     let query: string;
     let dataArgs: any[] = [];
     if (Array.isArray(queryStmt)) {
@@ -81,7 +84,10 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<model.ResultSet>}
    */
-  abstract runStatement(query: sql.Statement | sql.Statement[], connection?: any): Promise<model.ResultSet>;
+  abstract runStatement(
+    query: sql.Statement | sql.Statement[],
+    connection?: any
+  ): Promise<model.ResultSet>;
 
   /**
    * Run quries and stream output
@@ -102,7 +108,10 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<Readable>}
    */
-  abstract streamStatement(query: sql.Statement | sql.Statement[], connection?: any): Promise<Readable>;
+  abstract streamStatement(
+    query: sql.Statement | sql.Statement[],
+    connection?: any
+  ): Promise<Readable>;
 
   /**
    * Get a new Connection

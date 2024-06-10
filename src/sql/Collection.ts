@@ -71,8 +71,8 @@ class Collection extends INode {
       this.args = this.args.concat(this.stat.args);
       res = `(${this.stat.eval(handler)})`;
     } else if (this.leftColl && this.rightColl && this.join) {
-      let val0: string = this.leftColl.eval(handler);
-      let val1: string = this.rightColl.eval(handler);
+      const val0: string = this.leftColl.eval(handler);
+      const val1: string = this.rightColl.eval(handler);
       let join: string;
 
       switch (this.join) {

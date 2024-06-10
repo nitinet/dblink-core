@@ -13,7 +13,7 @@ abstract class INode {
    *
    * @type {Array<any>}
    */
-  args: Array<any> = new Array<any>();
+  args: unknown[] = [];
 
   /**
    * Evaluation Function to evaluate the Collection to Query

@@ -109,9 +109,9 @@ class Statement extends INode {
    * @returns {string}
    */
   insertQuery(handler: Handler): string {
-    let collectionStr = this.getCollectionStr(handler);
-    let columnStr = this.getColumnStr(handler);
-    let valueStr = this.getValueStr(handler);
+    const collectionStr = this.getCollectionStr(handler);
+    const columnStr = this.getColumnStr(handler);
+    const valueStr = this.getValueStr(handler);
 
     return `insert into ${collectionStr} (${columnStr}) values (${valueStr})`;
   }
@@ -123,12 +123,12 @@ class Statement extends INode {
    * @returns {string}
    */
   selectQuery(handler: Handler): string {
-    let collectionStr = this.getCollectionStr(handler);
-    let columnStr = this.getColumnStr(handler);
-    let whereStr = this.getWhereStr(handler);
-    let groupByStr = this.getGroupByStr(handler);
-    let orderByStr = this.getOrderByStr(handler);
-    let limitStr = this.getLimitStr(handler);
+    const collectionStr = this.getCollectionStr(handler);
+    const columnStr = this.getColumnStr(handler);
+    const whereStr = this.getWhereStr(handler);
+    const groupByStr = this.getGroupByStr(handler);
+    const orderByStr = this.getOrderByStr(handler);
+    const limitStr = this.getLimitStr(handler);
 
     return `select ${columnStr} from ${collectionStr}${whereStr}${groupByStr}${orderByStr}${limitStr}`;
   }
@@ -140,9 +140,9 @@ class Statement extends INode {
    * @returns {string}
    */
   updateQuery(handler: Handler): string {
-    let collectionStr = this.getCollectionStr(handler);
-    let columnStr = this.getColumnStr(handler);
-    let whereStr = this.getWhereStr(handler);
+    const collectionStr = this.getCollectionStr(handler);
+    const columnStr = this.getColumnStr(handler);
+    const whereStr = this.getWhereStr(handler);
 
     return `update ${collectionStr} set ${columnStr}${whereStr}`;
   }
@@ -154,8 +154,8 @@ class Statement extends INode {
    * @returns {string}
    */
   deleteQuery(handler: Handler): string {
-    let collectionStr = this.getCollectionStr(handler);
-    let whereStr = this.getWhereStr(handler);
+    const collectionStr = this.getCollectionStr(handler);
+    const whereStr = this.getWhereStr(handler);
 
     return `delete from ${collectionStr}${whereStr}`;
   }
@@ -167,7 +167,7 @@ class Statement extends INode {
    * @returns {string}
    */
   getCollectionStr(handler: Handler): string {
-    let collectionStr: string = this.collection.eval(handler);
+    const collectionStr: string = this.collection.eval(handler);
     this.args = this.args.concat(this.collection.args);
     return collectionStr;
   }
@@ -178,10 +178,10 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {*}
    */
-  getColumnStr(handler: Handler): any {
+  getColumnStr(handler: Handler): string {
     return this.columns
       .map(ele => {
-        let r = ele.eval(handler);
+        const r = ele.eval(handler);
         this.args = this.args.concat(ele.args);
         return r;
       }, this)
@@ -195,7 +195,7 @@ class Statement extends INode {
    * @returns {string}
    */
   getWhereStr(handler: Handler): string {
-    let whereStr: string = this.where.eval(handler);
+    const whereStr: string = this.where.eval(handler);
     this.args = this.args.concat(this.where.args);
     return whereStr ? ` where ${whereStr}` : '';
   }
@@ -206,10 +206,10 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {*}
    */
-  getValueStr(handler: Handler): any {
+  getValueStr(handler: Handler): string {
     return this.values
       .map(ele => {
-        let r = ele.eval(handler);
+        const r = ele.eval(handler);
         this.args = this.args.concat(ele.args);
         return r;
       }, this)
@@ -223,9 +223,9 @@ class Statement extends INode {
    * @returns {string}
    */
   getGroupByStr(handler: Handler): string {
-    let groupByStr = this.groupBy
+    const groupByStr = this.groupBy
       .map(ele => {
-        let r = ele.eval(handler);
+        const r = ele.eval(handler);
         this.args = this.args.concat(ele.args);
         return r;
       }, this)
@@ -240,9 +240,9 @@ class Statement extends INode {
    * @returns {string}
    */
   getOrderByStr(handler: Handler): string {
-    let orderByStr = this.orderBy
+    const orderByStr = this.orderBy
       .map(ele => {
-        let r = ele.eval(handler);
+        const r = ele.eval(handler);
         this.args = this.args.concat(ele.args);
         return r;
       }, this)
@@ -257,7 +257,7 @@ class Statement extends INode {
    * @returns {string}
    */
   getLimitStr(handler: Handler): string {
-    let limitStr: string = this.limit.eval(handler);
+    const limitStr: string = this.limit.eval(handler);
     this.args = this.args.concat(this.limit.args);
     return limitStr;
   }
