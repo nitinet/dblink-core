@@ -84,10 +84,7 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<model.ResultSet>}
    */
-  abstract runStatement(
-    query: sql.Statement | sql.Statement[],
-    connection?: any
-  ): Promise<model.ResultSet>;
+  abstract runStatement(query: sql.Statement | sql.Statement[], connection?: any): Promise<model.ResultSet>;
 
   /**
    * Run quries and stream output
@@ -108,10 +105,7 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<Readable>}
    */
-  abstract streamStatement(
-    query: sql.Statement | sql.Statement[],
-    connection?: any
-  ): Promise<Readable>;
+  abstract streamStatement(query: sql.Statement | sql.Statement[], connection?: any): Promise<Readable>;
 
   /**
    * Get a new Connection
