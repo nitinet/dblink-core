@@ -1,5 +1,5 @@
 class INode {
-  args = [];
+    args = [];
 }
 export default INode;
 //# sourceMappingURL=INode.js.map

@@ -30,6 +30,13 @@ class Statement extends INode {
   values: Array<Expression> = new Array<Expression>();
 
   /**
+   * Returning Column Nodes for insert
+   *
+   * @type {Array<INode>}
+   */
+  returnColumns: Array<INode> = new Array<INode>();
+
+  /**
    * Collection
    *
    * @type {Collection}
@@ -112,8 +119,9 @@ class Statement extends INode {
     const collectionStr = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const valueStr = this.getValueStr(handler);
+    const returnColumnsStr = handler.getReturnColumnsStr(this.returnColumns);
 
-    return `insert into ${collectionStr} (${columnStr}) values (${valueStr})`;
+    return `insert into ${collectionStr} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
   }
 
   /**

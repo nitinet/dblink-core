@@ -44,12 +44,12 @@ export default abstract class Handler {
    */
   protected prepareQuery(queryStmt: sql.Statement | sql.Statement[]): {
     query: string;
-    dataArgs: any[];
+    dataArgs: unknown[];
   } {
     let query: string;
-    let dataArgs: any[] = [];
+    const dataArgs: unknown[] = [];
     if (Array.isArray(queryStmt)) {
-      let tempQueries: string[] = [];
+      const tempQueries: string[] = [];
       queryStmt.forEach(a => {
         if (!(a instanceof sql.Statement)) throw new Error('Invalid Statement');
         tempQueries.push(a.eval(this));
@@ -74,7 +74,7 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<model.ResultSet>}
    */
-  abstract run(query: string, dataArgs?: any[], connection?: any): Promise<model.ResultSet>;
+  abstract run(query: string, dataArgs?: unknown[], connection?: unknown): Promise<model.ResultSet>;
 
   /**
    * Run statements
@@ -84,7 +84,7 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<model.ResultSet>}
    */
-  abstract runStatement(query: sql.Statement | sql.Statement[], connection?: any): Promise<model.ResultSet>;
+  abstract runStatement(query: sql.Statement | sql.Statement[], connection?: unknown): Promise<model.ResultSet>;
 
   /**
    * Run quries and stream output
@@ -95,7 +95,7 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<Readable>}
    */
-  abstract stream(query: string, dataArgs?: any[], connection?: any): Promise<Readable>;
+  abstract stream(query: string, dataArgs?: unknown[], connection?: unknown): Promise<Readable>;
 
   /**
    * Run statements and stream output
@@ -105,7 +105,7 @@ export default abstract class Handler {
    * @param {?*} [connection]
    * @returns {Promise<Readable>}
    */
-  abstract streamStatement(query: sql.Statement | sql.Statement[], connection?: any): Promise<Readable>;
+  abstract streamStatement(query: sql.Statement | sql.Statement[], connection?: unknown): Promise<Readable>;
 
   /**
    * Get a new Connection
@@ -113,7 +113,7 @@ export default abstract class Handler {
    * @abstract
    * @returns {Promise<any>}
    */
-  abstract getConnection(): Promise<any>;
+  abstract getConnection(): Promise<unknown>;
 
   /**
    * Initialize a Transaction
@@ -122,7 +122,7 @@ export default abstract class Handler {
    * @param {*} conn
    * @returns {Promise<void>}
    */
-  abstract initTransaction(conn: any): Promise<void>;
+  abstract initTransaction(conn: unknown): Promise<void>;
 
   /**
    * Commit Transaction
@@ -131,7 +131,7 @@ export default abstract class Handler {
    * @param {*} conn
    * @returns {Promise<void>}
    */
-  abstract commit(conn: any): Promise<void>;
+  abstract commit(conn: unknown): Promise<void>;
 
   /**
    * Rollback Transaction
@@ -140,7 +140,7 @@ export default abstract class Handler {
    * @param {*} conn
    * @returns {Promise<void>}
    */
-  abstract rollback(conn: any): Promise<void>;
+  abstract rollback(conn: unknown): Promise<void>;
 
   /**
    * Close Connection
@@ -149,7 +149,16 @@ export default abstract class Handler {
    * @param {*} conn
    * @returns {Promise<void>}
    */
-  abstract close(conn: any): Promise<void>;
+  abstract close(conn: unknown): Promise<void>;
+
+  /**
+   * creates a returing columns expression for the insert statement
+   *
+   * @abstract
+   * @param {sql.INode[]} returnColumns
+   * @returns {string}
+   */
+  abstract getReturnColumnsStr(returnColumns: sql.INode[]): string;
 
   // Comparison Operators
   /**
@@ -267,8 +276,8 @@ export default abstract class Handler {
    * @returns {string}
    */
   in(values: string[]): string {
-    let lhs = values[0];
-    let rhs = values.slice(1).join(', ');
+    const lhs = values[0];
+    const rhs = values.slice(1).join(', ');
     return `${lhs} in (${rhs})`;
   }
 
@@ -333,7 +342,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   limit(size: string, index?: string): string {
-    let indexStr = index ? `${index}, ` : '';
+    const indexStr = index ? `${index}, ` : '';
     return ` limit ${indexStr}${size}`;
   }
 
