@@ -119,7 +119,8 @@ class Statement extends INode {
     const collectionStr = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const valueStr = this.getValueStr(handler);
-    const returnColumnsStr = handler.getReturnColumnsStr(this.returnColumns);
+
+    const returnColumnsStr = this.returnColumns.length ? handler.getReturnColumnsStr(this.returnColumns) : '';
 
     return `insert into ${collectionStr} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
   }
