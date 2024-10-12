@@ -1,42 +1,42 @@
 /**
- * Description placeholder
+ * Connection Configuration
  *
  * @interface IConnectionConfig
  * @typedef {IConnectionConfig}
  */
 interface IConnectionConfig {
   /**
-   * Description placeholder
+   * Max number of connections
    *
    * @type {?number}
    */
   connectionLimit?: number;
   /**
-   * Description placeholder
+   * Hostname of the connection
    *
    * @type {string}
    */
   host: string;
   /**
-   * Description placeholder
+   * Connection Port
    *
    * @type {number}
    */
   port: number;
   /**
-   * Description placeholder
+   * Username
    *
    * @type {string}
    */
   username: string;
   /**
-   * Description placeholder
+   * Password
    *
    * @type {string}
    */
   password: string;
   /**
-   * Description placeholder
+   * Database Name
    *
    * @type {string}
    */

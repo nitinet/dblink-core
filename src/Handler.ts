@@ -1,6 +1,7 @@
 import { Readable } from 'node:stream';
 import * as model from './model/index.js';
 import * as sql from './sql/index.js';
+import { DataType, IEntityType } from './types.js';
 
 /**
  * Abstract handler class for implementing all Handlers
@@ -159,6 +160,10 @@ export default abstract class Handler {
    * @returns {string}
    */
   abstract getReturnColumnsStr(returnColumns: sql.INode[]): string;
+
+  abstract serializeValue(val: unknown, dataType: IEntityType<DataType>): unknown;
+
+  abstract deSerializeValue(val: unknown, dataType: IEntityType<DataType>): unknown;
 
   // Comparison Operators
   /**

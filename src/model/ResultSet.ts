@@ -1,5 +1,5 @@
 /**
- * Description placeholder
+ * Result data from connection
  *
  * @export
  * @class ResultSet
@@ -7,25 +7,14 @@
  */
 export default class ResultSet {
   /**
-   * Description placeholder
-   *
-   * @type {number}
-   */
-  rowCount: number = 0;
-  /**
-   * Description placeholder
-   *
-   * @type {*}
-   */
-  id: unknown = null;
-  /**
-   * Description placeholder
+   * Rows Data
    *
    * @type {Record<string, unknown>[]}
    */
   rows: Record<string, unknown>[] = [];
+
   /**
-   * Description placeholder
+   * Error message
    *
    * @type {(string | null)}
    */
