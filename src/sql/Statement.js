@@ -40,43 +40,53 @@ class Statement extends INode {
     let query = '';
     const args = [];
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
-    const columnStr = this.getColumnStr(handler);
-    const valueStr = this.getValueStr(handler);
+    const { query: colmQuery, args: colmArgs } = this.getColumnStr(handler);
+    const { query: valQuery, args: valArgs } = this.getValueStr(handler);
     const returnColumnsStr = this.returnColumns.length ? handler.getReturnColumnsStr(this.returnColumns) : '';
-    query = `insert into ${collQuery} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
+    query = `insert into ${collQuery} (${colmQuery}) values (${valQuery}) ${returnColumnsStr}`;
     args.push(...collArgs);
+    args.push(...colmArgs);
+    args.push(...valArgs);
     return { query, args };
   }
   selectQuery(handler) {
     let query = '';
     const args = [];
+    const { query: colmQuery, args: colmArgs } = this.getColumnStr(handler);
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
-    const columnStr = this.getColumnStr(handler);
-    const whereStr = this.getWhereStr(handler);
-    const groupByStr = this.getGroupByStr(handler);
-    const orderByStr = this.getOrderByStr(handler);
-    const limitStr = this.getLimitStr(handler);
-    query = `select ${columnStr} from ${collQuery}${whereStr}${groupByStr}${orderByStr}${limitStr}`;
+    const { query: whereQuery, args: whereArgs } = this.getWhereStr(handler);
+    const { query: groupQuery, args: groupArgs } = this.getGroupByStr(handler);
+    const { query: orderQuery, args: orderArgs } = this.getOrderByStr(handler);
+    const { query: limitQuery, args: limitArgs } = this.getLimitStr(handler);
+    query = `select ${colmQuery} from ${collQuery}${whereQuery}${groupQuery}${orderQuery}${limitQuery}`;
+    args.push(...colmArgs);
     args.push(...collArgs);
+    args.push(...whereArgs);
+    args.push(...groupArgs);
+    args.push(...orderArgs);
+    args.push(...limitArgs);
     return { query, args };
   }
   updateQuery(handler) {
     let query = '';
     const args = [];
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
-    const columnStr = this.getColumnStr(handler);
-    const whereStr = this.getWhereStr(handler);
-    query = `update ${collQuery} set ${columnStr}${whereStr}`;
+    const { query: colmQuery, args: colmArgs } = this.getColumnStr(handler);
+    const { query: whereQuery, args: whereArgs } = this.getWhereStr(handler);
+    query = `update ${collQuery} set ${colmQuery}${whereQuery}`;
     args.push(...collArgs);
+    args.push(...colmArgs);
+    args.push(...whereArgs);
     return { query, args };
   }
   deleteQuery(handler) {
     let query = '';
     const args = [];
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
-    const whereStr = this.getWhereStr(handler);
-    query = `delete from ${collQuery}${whereStr}`;
+    const { query: whereQuery, args: whereArgs } = this.getWhereStr(handler);
+    query = `delete from ${collQuery}${whereQuery}`;
     args.push(...collArgs);
+    args.push(...whereArgs);
     return { query, args };
   }
   getCollectionStr(handler) {
