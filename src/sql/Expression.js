@@ -43,97 +43,97 @@ class Expression {
       });
       const val0 = values[0] ? values[0] : '';
       const val1 = values[1] ? values[1] : '';
-      if (!this.operator) {
-        if (this.exps.length == 1) query = val0;
-        else this.operator = Operator.And;
+      if (this.operator || this.exps.length > 1) {
+        if (!this.operator) this.operator = Operator.And;
+        switch (this.operator) {
+          case Operator.Equal:
+            query = handler.eq(val0, val1);
+            break;
+          case Operator.NotEqual:
+            query = handler.neq(val0, val1);
+            break;
+          case Operator.LessThan:
+            query = handler.lt(val0, val1);
+            break;
+          case Operator.LessThanEqual:
+            query = handler.lteq(val0, val1);
+            break;
+          case Operator.GreaterThan:
+            query = handler.gt(val0, val1);
+            break;
+          case Operator.GreaterThanEqual:
+            query = handler.gteq(val0, val1);
+            break;
+          case Operator.And:
+            query = handler.and(values);
+            break;
+          case Operator.Or:
+            query = handler.or(values);
+            break;
+          case Operator.Not:
+            query = handler.not(val0);
+            break;
+          case Operator.Plus:
+            query = handler.plus(val0, val1);
+            break;
+          case Operator.Minus:
+            query = handler.minus(val0, val1);
+            break;
+          case Operator.Multiply:
+            query = handler.multiply(val0, val1);
+            break;
+          case Operator.Devide:
+            query = handler.devide(val0, val1);
+            break;
+          case Operator.Between:
+            query = handler.between(values[0], values[1], values[2]);
+            break;
+          case Operator.Exists:
+            query = handler.exists(val0);
+            break;
+          case Operator.In:
+            query = handler.in(values);
+            break;
+          case Operator.Like:
+            query = handler.like(val0, val1);
+            break;
+          case Operator.IsNull:
+            query = handler.isNull(val0);
+            break;
+          case Operator.IsNotNull:
+            query = handler.isNotNull(val0);
+            break;
+          case Operator.Asc:
+            query = handler.asc(val0);
+            break;
+          case Operator.Desc:
+            query = handler.desc(val0);
+            break;
+          case Operator.Limit:
+            query = handler.limit(val0, val1);
+            break;
+          case Operator.Count:
+            query = handler.count(val0);
+            break;
+          case Operator.Sum:
+            query = handler.sum(val0);
+            break;
+          case Operator.Min:
+            query = handler.min(val0);
+            break;
+          case Operator.Max:
+            query = handler.max(val0);
+            break;
+          case Operator.Avg:
+            query = handler.average(val0);
+            break;
+          default:
+            query = handler.and(values);
+            break;
+        }
+      } else {
+        query = val0;
       }
-      let r = '';
-      switch (this.operator) {
-        case Operator.Equal:
-          r = handler.eq(val0, val1);
-          break;
-        case Operator.NotEqual:
-          r = handler.neq(val0, val1);
-          break;
-        case Operator.LessThan:
-          r = handler.lt(val0, val1);
-          break;
-        case Operator.LessThanEqual:
-          r = handler.lteq(val0, val1);
-          break;
-        case Operator.GreaterThan:
-          r = handler.gt(val0, val1);
-          break;
-        case Operator.GreaterThanEqual:
-          r = handler.gteq(val0, val1);
-          break;
-        case Operator.And:
-          r = handler.and(values);
-          break;
-        case Operator.Or:
-          r = handler.or(values);
-          break;
-        case Operator.Not:
-          r = handler.not(val0);
-          break;
-        case Operator.Plus:
-          r = handler.plus(val0, val1);
-          break;
-        case Operator.Minus:
-          r = handler.minus(val0, val1);
-          break;
-        case Operator.Multiply:
-          r = handler.multiply(val0, val1);
-          break;
-        case Operator.Devide:
-          r = handler.devide(val0, val1);
-          break;
-        case Operator.Between:
-          r = handler.between(values[0], values[1], values[2]);
-          break;
-        case Operator.Exists:
-          r = handler.exists(val0);
-          break;
-        case Operator.In:
-          r = handler.in(values);
-          break;
-        case Operator.Like:
-          r = handler.like(val0, val1);
-          break;
-        case Operator.IsNull:
-          r = handler.isNull(val0);
-          break;
-        case Operator.IsNotNull:
-          r = handler.isNotNull(val0);
-          break;
-        case Operator.Asc:
-          r = handler.asc(val0);
-          break;
-        case Operator.Desc:
-          r = handler.desc(val0);
-          break;
-        case Operator.Limit:
-          r = handler.limit(val0, val1);
-          break;
-        case Operator.Count:
-          r = handler.count(val0);
-          break;
-        case Operator.Sum:
-          r = handler.sum(val0);
-          break;
-        case Operator.Min:
-          r = handler.min(val0);
-          break;
-        case Operator.Max:
-          r = handler.max(val0);
-          break;
-        case Operator.Avg:
-          r = handler.average(val0);
-          break;
-        default:
-          break;
-      }
-      query = r;
     }
     return { query, args };
   }
