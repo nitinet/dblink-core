@@ -88,25 +88,27 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  eval(handler: Handler): string {
-    let result: string;
+  eval(handler: Handler): { query: string; args: unknown[] } {
+    let res: { query: string; args: unknown[] };
+
     switch (this.command) {
       case Command.SELECT:
-        result = this.selectQuery(handler);
+        res = this.selectQuery(handler);
         break;
       case Command.INSERT:
-        result = this.insertQuery(handler);
+        res = this.insertQuery(handler);
         break;
       case Command.UPDATE:
-        result = this.updateQuery(handler);
+        res = this.updateQuery(handler);
         break;
       case Command.DELETE:
-        result = this.deleteQuery(handler);
+        res = this.deleteQuery(handler);
         break;
       default:
         throw new Error('Invalid Statement');
     }
-    return result;
+
+    return res;
   }
 
   /**
@@ -115,14 +117,21 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  insertQuery(handler: Handler): string {
-    const collectionStr = this.getCollectionStr(handler);
+  insertQuery(handler: Handler): { query: string; args: unknown[] } {
+    let query: string = '';
+    const args: unknown[] = [];
+
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const valueStr = this.getValueStr(handler);
 
     const returnColumnsStr = this.returnColumns.length ? handler.getReturnColumnsStr(this.returnColumns) : '';
 
-    return `insert into ${collectionStr} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
+    query = `insert into ${collQuery} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
+
+    args.push(...collArgs);
+
+    return { query, args };
   }
 
   /**
@@ -131,15 +140,22 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  selectQuery(handler: Handler): string {
-    const collectionStr = this.getCollectionStr(handler);
+  selectQuery(handler: Handler): { query: string; args: unknown[] } {
+    let query: string = '';
+    const args: unknown[] = [];
+
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const whereStr = this.getWhereStr(handler);
     const groupByStr = this.getGroupByStr(handler);
     const orderByStr = this.getOrderByStr(handler);
     const limitStr = this.getLimitStr(handler);
 
-    return `select ${columnStr} from ${collectionStr}${whereStr}${groupByStr}${orderByStr}${limitStr}`;
+    query = `select ${columnStr} from ${collQuery}${whereStr}${groupByStr}${orderByStr}${limitStr}`;
+
+    args.push(...collArgs);
+
+    return { query, args };
   }
 
   /**
@@ -148,12 +164,19 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  updateQuery(handler: Handler): string {
-    const collectionStr = this.getCollectionStr(handler);
+  updateQuery(handler: Handler): { query: string; args: unknown[] } {
+    let query: string = '';
+    const args: unknown[] = [];
+
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const whereStr = this.getWhereStr(handler);
 
-    return `update ${collectionStr} set ${columnStr}${whereStr}`;
+    query = `update ${collQuery} set ${columnStr}${whereStr}`;
+
+    args.push(...collArgs);
+
+    return { query, args };
   }
 
   /**
@@ -162,11 +185,18 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  deleteQuery(handler: Handler): string {
-    const collectionStr = this.getCollectionStr(handler);
+  deleteQuery(handler: Handler): { query: string; args: unknown[] } {
+    let query: string = '';
+    const args: unknown[] = [];
+
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const whereStr = this.getWhereStr(handler);
 
-    return `delete from ${collectionStr}${whereStr}`;
+    query = `delete from ${collQuery}${whereStr}`;
+
+    args.push(...collArgs);
+
+    return { query, args };
   }
 
   /**
@@ -175,10 +205,8 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  getCollectionStr(handler: Handler): string {
-    const collectionStr: string = this.collection.eval(handler);
-    this.args = this.args.concat(this.collection.args);
-    return collectionStr;
+  getCollectionStr(handler: Handler) {
+    return this.collection.eval(handler);
   }
 
   /**
@@ -187,14 +215,11 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {*}
    */
-  getColumnStr(handler: Handler): string {
-    return this.columns
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
+  getColumnStr(handler: Handler): { query: string; args: unknown[] } {
+    const data = this.columns.map(ele => ele.eval(handler));
+    const query = data.map(a => a.query).join(', ');
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
 
   /**
@@ -203,10 +228,10 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  getWhereStr(handler: Handler): string {
-    const whereStr: string = this.where.eval(handler);
-    this.args = this.args.concat(this.where.args);
-    return whereStr ? ` where ${whereStr}` : '';
+  getWhereStr(handler: Handler): { query: string; args: unknown[] } {
+    const { query: whereQuery, args } = this.where.eval(handler);
+    const query = whereQuery ? ` where ${whereQuery}` : '';
+    return { query, args };
   }
 
   /**
@@ -215,14 +240,11 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {*}
    */
-  getValueStr(handler: Handler): string {
-    return this.values
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
+  getValueStr(handler: Handler): { query: string; args: unknown[] } {
+    const data = this.values.map(ele => ele.eval(handler));
+    const query = data.map(a => a.query).join(', ');
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
 
   /**
@@ -231,15 +253,12 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  getGroupByStr(handler: Handler): string {
-    const groupByStr = this.groupBy
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
-    return groupByStr ? ` group by ${groupByStr}` : '';
+  getGroupByStr(handler: Handler): { query: string; args: unknown[] } {
+    const data = this.groupBy.map(ele => ele.eval(handler));
+    const groupByStr = data.map(a => a.query).join(', ');
+    const query = groupByStr ? ` group by ${groupByStr}` : '';
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
 
   /**
@@ -248,15 +267,12 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  getOrderByStr(handler: Handler): string {
-    const orderByStr = this.orderBy
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
-    return orderByStr ? ` order by ${orderByStr}` : '';
+  getOrderByStr(handler: Handler): { query: string; args: unknown[] } {
+    const data = this.orderBy.map(ele => ele.eval(handler));
+    const orderByStr = data.map(a => a.query).join(', ');
+    const query = orderByStr ? ` order by ${orderByStr}` : '';
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
 
   /**
@@ -265,10 +281,8 @@ class Statement extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  getLimitStr(handler: Handler): string {
-    const limitStr: string = this.limit.eval(handler);
-    this.args = this.args.concat(this.limit.args);
-    return limitStr;
+  getLimitStr(handler: Handler): { query: string; args: unknown[] } {
+    return this.limit.eval(handler);
   }
 }
 

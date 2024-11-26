@@ -9,20 +9,13 @@ import Handler from '../Handler.js';
  */
 abstract class INode {
   /**
-   * Arguments of Node
-   *
-   * @type {Array<any>}
-   */
-  args: unknown[] = [];
-
-  /**
-   * Evaluation Function to evaluate the Collection to Query
+   * Evaluation Function to evaluate the Node to Query
    *
    * @abstract
    * @param {Handler} handler
    * @returns {string}
    */
-  abstract eval(handler: Handler): string;
+  abstract eval(handler: Handler): { query: string; args: unknown[] };
 }
 
 export default INode;

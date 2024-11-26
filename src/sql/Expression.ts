@@ -101,25 +101,27 @@ class Expression implements INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  eval(handler: Handler): string {
+  eval(handler: Handler): { query: string; args: unknown[] } {
+    let query: string = '';
+    let args: unknown[] = [];
+
     if (this.value) {
-      return this.value;
+      query = this.value;
+      args = this.args;
     } else {
-      const values = this.exps
-        .map(exp => {
-          if (exp) {
-            const str = exp.eval(handler);
-            this.args = this.args.concat(exp.args);
-            return str;
-          }
-        })
-        .filter((exp): exp is string => exp != null);
+      const values: string[] = [];
+
+      this.exps.forEach(exp => {
+        const { query: expQuery, args: expArgs } = exp.eval(handler);
+        values.push(expQuery);
+        args.push(...expArgs);
+      });
 
       const val0: string = values[0] ? values[0] : '';
       const val1: string = values[1] ? values[1] : '';
 
       if (!this.operator) {
-        if (this.exps.length == 1) return val0;
+        if (this.exps.length == 1) query = val0;
         else this.operator = Operator.And;
       }
 
@@ -209,8 +211,10 @@ class Expression implements INode {
         default:
           break;
       }
-      return r;
+      query = r;
     }
+
+    return { query, args };
   }
 }
 

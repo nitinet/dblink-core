@@ -17,104 +17,104 @@ class Statement extends INode {
     this.command = command;
   }
   eval(handler) {
-    let result;
+    let res;
     switch (this.command) {
       case Command.SELECT:
-        result = this.selectQuery(handler);
+        res = this.selectQuery(handler);
         break;
       case Command.INSERT:
-        result = this.insertQuery(handler);
+        res = this.insertQuery(handler);
         break;
       case Command.UPDATE:
-        result = this.updateQuery(handler);
+        res = this.updateQuery(handler);
         break;
       case Command.DELETE:
-        result = this.deleteQuery(handler);
+        res = this.deleteQuery(handler);
         break;
       default:
         throw new Error('Invalid Statement');
     }
-    return result;
+    return res;
   }
   insertQuery(handler) {
-    const collectionStr = this.getCollectionStr(handler);
+    let query = '';
+    const args = [];
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const valueStr = this.getValueStr(handler);
     const returnColumnsStr = this.returnColumns.length ? handler.getReturnColumnsStr(this.returnColumns) : '';
-    return `insert into ${collectionStr} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
+    query = `insert into ${collQuery} (${columnStr}) values (${valueStr}) ${returnColumnsStr}`;
+    args.push(...collArgs);
+    return { query, args };
   }
   selectQuery(handler) {
-    const collectionStr = this.getCollectionStr(handler);
+    let query = '';
+    const args = [];
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const whereStr = this.getWhereStr(handler);
     const groupByStr = this.getGroupByStr(handler);
     const orderByStr = this.getOrderByStr(handler);
     const limitStr = this.getLimitStr(handler);
-    return `select ${columnStr} from ${collectionStr}${whereStr}${groupByStr}${orderByStr}${limitStr}`;
+    query = `select ${columnStr} from ${collQuery}${whereStr}${groupByStr}${orderByStr}${limitStr}`;
+    args.push(...collArgs);
+    return { query, args };
   }
   updateQuery(handler) {
-    const collectionStr = this.getCollectionStr(handler);
+    let query = '';
+    const args = [];
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const columnStr = this.getColumnStr(handler);
     const whereStr = this.getWhereStr(handler);
-    return `update ${collectionStr} set ${columnStr}${whereStr}`;
+    query = `update ${collQuery} set ${columnStr}${whereStr}`;
+    args.push(...collArgs);
+    return { query, args };
   }
   deleteQuery(handler) {
-    const collectionStr = this.getCollectionStr(handler);
+    let query = '';
+    const args = [];
+    const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const whereStr = this.getWhereStr(handler);
-    return `delete from ${collectionStr}${whereStr}`;
+    query = `delete from ${collQuery}${whereStr}`;
+    args.push(...collArgs);
+    return { query, args };
   }
   getCollectionStr(handler) {
-    const collectionStr = this.collection.eval(handler);
-    this.args = this.args.concat(this.collection.args);
-    return collectionStr;
+    return this.collection.eval(handler);
   }
   getColumnStr(handler) {
-    return this.columns
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
+    const data = this.columns.map(ele => ele.eval(handler));
+    const query = data.map(a => a.query).join(', ');
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
   getWhereStr(handler) {
-    const whereStr = this.where.eval(handler);
-    this.args = this.args.concat(this.where.args);
-    return whereStr ? ` where ${whereStr}` : '';
+    const { query: whereQuery, args } = this.where.eval(handler);
+    const query = whereQuery ? ` where ${whereQuery}` : '';
+    return { query, args };
   }
   getValueStr(handler) {
-    return this.values
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
+    const data = this.values.map(ele => ele.eval(handler));
+    const query = data.map(a => a.query).join(', ');
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
   getGroupByStr(handler) {
-    const groupByStr = this.groupBy
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
-    return groupByStr ? ` group by ${groupByStr}` : '';
+    const data = this.groupBy.map(ele => ele.eval(handler));
+    const groupByStr = data.map(a => a.query).join(', ');
+    const query = groupByStr ? ` group by ${groupByStr}` : '';
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
   getOrderByStr(handler) {
-    const orderByStr = this.orderBy
-      .map(ele => {
-        const r = ele.eval(handler);
-        this.args = this.args.concat(ele.args);
-        return r;
-      }, this)
-      .join(', ');
-    return orderByStr ? ` order by ${orderByStr}` : '';
+    const data = this.orderBy.map(ele => ele.eval(handler));
+    const orderByStr = data.map(a => a.query).join(', ');
+    const query = orderByStr ? ` order by ${orderByStr}` : '';
+    const args = data.map(a => a.args).flat();
+    return { query, args };
   }
   getLimitStr(handler) {
-    const limitStr = this.limit.eval(handler);
-    this.args = this.args.concat(this.limit.args);
-    return limitStr;
+    return this.limit.eval(handler);
   }
 }
 export default Statement;

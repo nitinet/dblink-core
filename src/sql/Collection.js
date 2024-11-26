@@ -9,15 +9,17 @@ class Collection extends INode {
   join = null;
   alias = null;
   eval(handler) {
-    let res = '';
+    let query = '';
+    let args = [];
     if (this.value) {
-      res = this.colAlias ? `${this.colAlias}.${this.value}` : this.value;
+      query = this.colAlias ? `${this.colAlias}.${this.value}` : this.value;
     } else if (this.stat) {
-      this.args = this.args.concat(this.stat.args);
-      res = `(${this.stat.eval(handler)})`;
+      const { query: stmtQuery, args: stmtArgs } = this.stat.eval(handler);
+      query = stmtQuery;
+      args = stmtArgs;
     } else if (this.leftColl && this.rightColl && this.join) {
-      const val0 = this.leftColl.eval(handler);
-      const val1 = this.rightColl.eval(handler);
+      const { query: leftQuery, args: leftArgs } = this.leftColl.eval(handler);
+      const { query: rightQuery, args: rightArgs } = this.rightColl.eval(handler);
       let join;
       switch (this.join) {
         case Join.InnerJoin:
@@ -36,15 +38,17 @@ class Collection extends INode {
           join = 'inner';
           break;
       }
-      res = `(${val0} ${join} join ${val1})`;
+      query = `(${leftQuery} ${join} join ${rightQuery})`;
+      args.push(...leftArgs);
+      args.push(...rightArgs);
     }
-    if (!res) {
+    if (!query) {
       throw new Error('No Collection Found');
     }
     if (this.alias) {
-      res = `${res} as ${this.alias}`;
+      query = `${query} as ${this.alias}`;
     }
-    return res;
+    return { query, args };
   }
 }
 export default Collection;

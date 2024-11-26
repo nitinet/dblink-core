@@ -63,16 +63,20 @@ class Collection extends INode {
    * @param {Handler} handler
    * @returns {string}
    */
-  eval(handler: Handler): string {
-    let res: string = '';
+  eval(handler: Handler): { query: string; args: unknown[] } {
+    let query: string = '';
+    let args: unknown[] = [];
+
     if (this.value) {
-      res = this.colAlias ? `${this.colAlias}.${this.value}` : this.value;
+      query = this.colAlias ? `${this.colAlias}.${this.value}` : this.value;
     } else if (this.stat) {
-      this.args = this.args.concat(this.stat.args);
-      res = `(${this.stat.eval(handler)})`;
+      const { query: stmtQuery, args: stmtArgs } = this.stat.eval(handler);
+
+      query = stmtQuery;
+      args = stmtArgs;
     } else if (this.leftColl && this.rightColl && this.join) {
-      const val0: string = this.leftColl.eval(handler);
-      const val1: string = this.rightColl.eval(handler);
+      const { query: leftQuery, args: leftArgs } = this.leftColl.eval(handler);
+      const { query: rightQuery, args: rightArgs } = this.rightColl.eval(handler);
       let join: string;
 
       switch (this.join) {
@@ -93,15 +97,18 @@ class Collection extends INode {
           break;
       }
 
-      res = `(${val0} ${join} join ${val1})`;
+      query = `(${leftQuery} ${join} join ${rightQuery})`;
+      args.push(...leftArgs);
+      args.push(...rightArgs);
     }
-    if (!res) {
+    if (!query) {
       throw new Error('No Collection Found');
     }
     if (this.alias) {
-      res = `${res} as ${this.alias}`;
+      query = `${query} as ${this.alias}`;
     }
-    return res;
+
+    return { query, args };
   }
 }
 

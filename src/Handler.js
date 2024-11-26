@@ -11,13 +11,15 @@ export default class Handler {
       const tempQueries = [];
       queryStmt.forEach(a => {
         if (!(a instanceof sql.Statement)) throw new Error('Invalid Statement');
-        tempQueries.push(a.eval(this));
-        dataArgs.push(...a.args);
+        const { query, args } = a.eval(this);
+        tempQueries.push(query);
+        dataArgs.push(...args);
       });
       query = tempQueries.join('; ').concat(';');
     } else if (queryStmt instanceof sql.Statement) {
-      query = queryStmt.eval(this);
-      dataArgs.push(...queryStmt.args);
+      const { query: stmtQuery, args } = queryStmt.eval(this);
+      query = stmtQuery;
+      dataArgs.push(...args);
     } else {
       throw new Error('Invaid Statement');
     }

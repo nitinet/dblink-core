@@ -29,22 +29,22 @@ class Expression {
     return new Expression(null, Operator.Not, this);
   }
   eval(handler) {
+    let query = '';
+    let args = [];
     if (this.value) {
-      return this.value;
+      query = this.value;
+      args = this.args;
     } else {
-      const values = this.exps
-        .map(exp => {
-          if (exp) {
-            const str = exp.eval(handler);
-            this.args = this.args.concat(exp.args);
-            return str;
-          }
-        })
-        .filter(exp => exp != null);
+      const values = [];
+      this.exps.forEach(exp => {
+        const { query: expQuery, args: expArgs } = exp.eval(handler);
+        values.push(expQuery);
+        args.push(...expArgs);
+      });
       const val0 = values[0] ? values[0] : '';
       const val1 = values[1] ? values[1] : '';
       if (!this.operator) {
-        if (this.exps.length == 1) return val0;
+        if (this.exps.length == 1) query = val0;
         else this.operator = Operator.And;
       }
       let r = '';
@@ -133,8 +133,9 @@ class Expression {
         default:
           break;
       }
-      return r;
+      query = r;
     }
+    return { query, args };
   }
 }
 export default Expression;
