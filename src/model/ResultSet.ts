@@ -1,22 +1,12 @@
 /**
- * Result data from connection
- *
- * @export
- * @class ResultSet
- * @typedef {ResultSet}
+ * Represents the result of a SQL query, including returned rows and optional error info.
  */
 export default class ResultSet {
-  /**
-   * Rows Data
-   *
-   * @type {Record<string, unknown>[]}
-   */
-  rows: Record<string, unknown>[] = [];
+  rows: Record<string, unknown>[];
+  error: string | null;
 
-  /**
-   * Error message
-   *
-   * @type {(string | null)}
-   */
-  error: string | null = null;
+  constructor(rows: Record<string, unknown>[] = [], error: string | null = null) {
+    this.rows = rows;
+    this.error = error;
+  }
 }

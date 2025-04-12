@@ -111,6 +111,13 @@ class Statement extends INode {
     return res;
   }
 
+  private combineQueries(parts: string[], ...argSets: unknown[][]): { query: string; args: unknown[] } {
+    return {
+      query: parts.filter(Boolean).join(' '),
+      args: argSets.flat()
+    };
+  }
+
   /**
    * Generate Insert query
    *
@@ -118,22 +125,13 @@ class Statement extends INode {
    * @returns {string}
    */
   insertQuery(handler: Handler): { query: string; args: unknown[] } {
-    let query: string = '';
-    const args: unknown[] = [];
-
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const { query: colmQuery, args: colmArgs } = this.getColumnStr(handler);
     const { query: valQuery, args: valArgs } = this.getValueStr(handler);
-
     const returnColumnsStr = this.returnColumns.length ? handler.getReturnColumnsStr(this.returnColumns) : '';
 
-    query = `insert into ${collQuery} (${colmQuery}) values (${valQuery}) ${returnColumnsStr}`;
-
-    args.push(...collArgs);
-    args.push(...colmArgs);
-    args.push(...valArgs);
-
-    return { query, args };
+    const parts = ['insert into', collQuery, `(${colmQuery})`, 'values', `(${valQuery})`, returnColumnsStr];
+    return this.combineQueries(parts, collArgs, colmArgs, valArgs);
   }
 
   /**
@@ -143,8 +141,7 @@ class Statement extends INode {
    * @returns {string}
    */
   selectQuery(handler: Handler): { query: string; args: unknown[] } {
-    let query: string = '';
-    const args: unknown[] = [];
+    const parts = [];
 
     const { query: colmQuery, args: colmArgs } = this.getColumnStr(handler);
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
@@ -153,16 +150,9 @@ class Statement extends INode {
     const { query: orderQuery, args: orderArgs } = this.getOrderByStr(handler);
     const { query: limitQuery, args: limitArgs } = this.getLimitStr(handler);
 
-    query = `select ${colmQuery} from ${collQuery}${whereQuery}${groupQuery}${orderQuery}${limitQuery}`;
+    parts.push('select', colmQuery, 'from', collQuery, whereQuery, groupQuery, orderQuery, limitQuery);
 
-    args.push(...colmArgs);
-    args.push(...collArgs);
-    args.push(...whereArgs);
-    args.push(...groupArgs);
-    args.push(...orderArgs);
-    args.push(...limitArgs);
-
-    return { query, args };
+    return this.combineQueries(parts, collArgs, colmArgs, whereArgs, groupArgs, orderArgs, limitArgs);
   }
 
   /**
@@ -172,20 +162,15 @@ class Statement extends INode {
    * @returns {string}
    */
   updateQuery(handler: Handler): { query: string; args: unknown[] } {
-    let query: string = '';
-    const args: unknown[] = [];
+    const parts = [];
 
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const { query: colmQuery, args: colmArgs } = this.getColumnStr(handler);
     const { query: whereQuery, args: whereArgs } = this.getWhereStr(handler);
 
-    query = `update ${collQuery} set ${colmQuery}${whereQuery}`;
+    parts.push('update', collQuery, 'set', colmQuery, whereQuery);
 
-    args.push(...collArgs);
-    args.push(...colmArgs);
-    args.push(...whereArgs);
-
-    return { query, args };
+    return this.combineQueries(parts, collArgs, colmArgs, whereArgs);
   }
 
   /**
@@ -195,18 +180,14 @@ class Statement extends INode {
    * @returns {string}
    */
   deleteQuery(handler: Handler): { query: string; args: unknown[] } {
-    let query: string = '';
-    const args: unknown[] = [];
+    const parts = [];
 
     const { query: collQuery, args: collArgs } = this.getCollectionStr(handler);
     const { query: whereQuery, args: whereArgs } = this.getWhereStr(handler);
 
-    query = `delete from ${collQuery}${whereQuery}`;
+    parts.push('delete from', collQuery, whereQuery);
 
-    args.push(...collArgs);
-    args.push(...whereArgs);
-
-    return { query, args };
+    return this.combineQueries(parts, collArgs, whereArgs);
   }
 
   /**
@@ -220,16 +201,17 @@ class Statement extends INode {
   }
 
   /**
-   * Get Collumns query
+   * Get Columns query
    *
    * @param {Handler} handler
    * @returns {*}
    */
   getColumnStr(handler: Handler): { query: string; args: unknown[] } {
     const data = this.columns.map(ele => ele.eval(handler));
-    const query = data.map(a => a.query).join(', ');
-    const args = data.map(a => a.args).flat();
-    return { query, args };
+    return {
+      query: data.map(a => a.query).join(', '),
+      args: data.flatMap(a => a.args)
+    };
   }
 
   /**
@@ -240,7 +222,7 @@ class Statement extends INode {
    */
   getWhereStr(handler: Handler): { query: string; args: unknown[] } {
     const { query: whereQuery, args } = this.where.eval(handler);
-    const query = whereQuery ? ` where ${whereQuery}` : '';
+    const query = whereQuery ? `where ${whereQuery}` : '';
     return { query, args };
   }
 
@@ -252,9 +234,10 @@ class Statement extends INode {
    */
   getValueStr(handler: Handler): { query: string; args: unknown[] } {
     const data = this.values.map(ele => ele.eval(handler));
-    const query = data.map(a => a.query).join(', ');
-    const args = data.map(a => a.args).flat();
-    return { query, args };
+    return {
+      query: data.map(a => a.query).join(', '),
+      args: data.flatMap(a => a.args)
+    };
   }
 
   /**
@@ -266,9 +249,10 @@ class Statement extends INode {
   getGroupByStr(handler: Handler): { query: string; args: unknown[] } {
     const data = this.groupBy.map(ele => ele.eval(handler));
     const groupByStr = data.map(a => a.query).join(', ');
-    const query = groupByStr ? ` group by ${groupByStr}` : '';
-    const args = data.map(a => a.args).flat();
-    return { query, args };
+    return {
+      query: groupByStr ? `group by ${groupByStr}` : '',
+      args: data.flatMap(a => a.args)
+    };
   }
 
   /**
@@ -280,9 +264,10 @@ class Statement extends INode {
   getOrderByStr(handler: Handler): { query: string; args: unknown[] } {
     const data = this.orderBy.map(ele => ele.eval(handler));
     const orderByStr = data.map(a => a.query).join(', ');
-    const query = orderByStr ? ` order by ${orderByStr}` : '';
-    const args = data.map(a => a.args).flat();
-    return { query, args };
+    return {
+      query: orderByStr ? `order by ${orderByStr}` : '',
+      args: data.flatMap(a => a.args)
+    };
   }
 
   /**

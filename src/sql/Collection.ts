@@ -58,52 +58,58 @@ class Collection extends INode {
   alias: string | null = null;
 
   /**
+   * Private helper method to resolve the SQL join type
+   *
+   * @param {Join} join
+   * @returns {string}
+   */
+  private resolveJoinType(join: Join): string {
+    switch (join) {
+      case Join.LeftJoin:
+        return 'left';
+      case Join.RightJoin:
+        return 'right';
+      case Join.OuterJoin:
+        return 'outer';
+      default:
+        return 'inner';
+    }
+  }
+
+  /**
    * Evaluation Function to evaluate the Collection to Query
    *
    * @param {Handler} handler
-   * @returns {string}
+   * @returns {{ query: string; args: unknown[] }}
    */
   eval(handler: Handler): { query: string; args: unknown[] } {
     let query: string = '';
     let args: unknown[] = [];
 
+    // Evaluate based on value
     if (this.value) {
       query = this.colAlias ? `${this.colAlias}.${this.value}` : this.value;
-    } else if (this.stat) {
+    }
+    // Evaluate based on statement
+    else if (this.stat) {
       const { query: stmtQuery, args: stmtArgs } = this.stat.eval(handler);
-
       query = stmtQuery;
       args = stmtArgs;
-    } else if (this.leftColl && this.rightColl && this.join) {
+    }
+    // Evaluate based on join
+    else if (this.leftColl && this.rightColl && this.join) {
       const { query: leftQuery, args: leftArgs } = this.leftColl.eval(handler);
       const { query: rightQuery, args: rightArgs } = this.rightColl.eval(handler);
-      let join: string;
-
-      switch (this.join) {
-        case Join.InnerJoin:
-          join = 'inner';
-          break;
-        case Join.LeftJoin:
-          join = 'left';
-          break;
-        case Join.RightJoin:
-          join = 'right';
-          break;
-        case Join.OuterJoin:
-          join = 'outer';
-          break;
-        default:
-          join = 'inner';
-          break;
-      }
-
-      query = `(${leftQuery} ${join} join ${rightQuery})`;
+      const joinType = this.resolveJoinType(this.join);
+      query = `(${leftQuery} ${joinType} join ${rightQuery})`;
       args.push(...leftArgs);
       args.push(...rightArgs);
     }
+
     if (!query) {
       throw new Error('No Collection Found');
     }
+
     if (this.alias) {
       query = `${query} as ${this.alias}`;
     }

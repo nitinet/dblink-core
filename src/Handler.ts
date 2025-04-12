@@ -29,6 +29,8 @@ export default abstract class Handler {
     this.config = config;
   }
 
+  // Abstract Methods
+
   /**
    * Handler initialisation
    *
@@ -36,39 +38,6 @@ export default abstract class Handler {
    * @returns {Promise<void>}
    */
   abstract init(): Promise<void>;
-
-  /**
-   * Query prepration from statement or statements
-   *
-   * @param {(sql.Statement | sql.Statement[])} queryStmt
-   * @returns {{ query: string; dataArgs: {}; }}
-   */
-  protected prepareQuery(queryStmt: sql.Statement | sql.Statement[]): {
-    query: string;
-    dataArgs: unknown[];
-  } {
-    let query: string;
-    const dataArgs: unknown[] = [];
-
-    if (Array.isArray(queryStmt)) {
-      const tempQueries: string[] = [];
-      queryStmt.forEach(a => {
-        if (!(a instanceof sql.Statement)) throw new Error('Invalid Statement');
-
-        const { query, args } = a.eval(this);
-        tempQueries.push(query);
-        dataArgs.push(...args);
-      });
-      query = tempQueries.join('; ').concat(';');
-    } else if (queryStmt instanceof sql.Statement) {
-      const { query: stmtQuery, args } = queryStmt.eval(this);
-      query = stmtQuery;
-      dataArgs.push(...args);
-    } else {
-      throw new Error('Invaid Statement');
-    }
-    return { query, dataArgs };
-  }
 
   /**
    * Run string query
@@ -92,7 +61,7 @@ export default abstract class Handler {
   abstract runStatement(query: sql.Statement | sql.Statement[], connection?: unknown): Promise<model.ResultSet>;
 
   /**
-   * Run quries and stream output
+   * Run queries and stream output
    *
    * @abstract
    * @param {string} query
@@ -157,7 +126,7 @@ export default abstract class Handler {
   abstract close(conn: unknown): Promise<void>;
 
   /**
-   * creates a returing columns expression for the insert statement
+   * Creates a returning columns expression for the insert statement
    *
    * @abstract
    * @param {sql.INode[]} returnColumns
@@ -169,6 +138,42 @@ export default abstract class Handler {
 
   abstract deSerializeValue(val: unknown, dataType: IEntityType<DataType>): unknown;
 
+  // Utility
+  protected prepareQuery(queryStmt: sql.Statement | sql.Statement[]): {
+    query: string;
+    dataArgs: unknown[];
+  } {
+    let query: string;
+    const dataArgs: unknown[] = [];
+
+    if (Array.isArray(queryStmt)) {
+      const tempQueries: string[] = [];
+      queryStmt.forEach(a => {
+        if (!(a instanceof sql.Statement)) throw new Error('Invalid Statement');
+
+        const { query, args } = a.eval(this);
+        tempQueries.push(query);
+        dataArgs.push(...args);
+      });
+      query = tempQueries.join('; ').concat(';');
+    } else if (queryStmt instanceof sql.Statement) {
+      const { query: stmtQuery, args } = queryStmt.eval(this);
+      query = stmtQuery;
+      dataArgs.push(...args);
+    } else {
+      throw new Error('Invalid Statement');
+    }
+    return { query, dataArgs };
+  }
+
+  private binaryExpr(lhs: string, op: string, rhs: string): string {
+    return `${lhs} ${op} ${rhs}`;
+  }
+
+  private wrapExpressions(values: string[]): string[] {
+    return values.filter(Boolean).map(val => `(${val})`);
+  }
+
   // Comparison Operators
   /**
    * Equal Operator
@@ -178,7 +183,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   eq(val0: string, val1: string): string {
-    return `${val0} = ${val1}`;
+    return this.binaryExpr(val0, '=', val1);
   }
 
   /**
@@ -189,7 +194,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   neq(val0: string, val1: string): string {
-    return `${val0} != ${val1}`;
+    return this.binaryExpr(val0, '!=', val1);
   }
 
   /**
@@ -200,7 +205,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   lt(val0: string, val1: string): string {
-    return `${val0} < ${val1}`;
+    return this.binaryExpr(val0, '<', val1);
   }
 
   /**
@@ -211,7 +216,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   gt(val0: string, val1: string): string {
-    return `${val0} > ${val1}`;
+    return this.binaryExpr(val0, '>', val1);
   }
 
   /**
@@ -222,18 +227,18 @@ export default abstract class Handler {
    * @returns {string}
    */
   lteq(val0: string, val1: string): string {
-    return `${val0} <= ${val1}`;
+    return this.binaryExpr(val0, '<=', val1);
   }
 
   /**
-   * Greator than and Equal Operator
+   * Greater than and Equal Operator
    *
    * @param {string} val0
    * @param {string} val1
    * @returns {string}
    */
   gteq(val0: string, val1: string): string {
-    return `${val0} >= ${val1}`;
+    return this.binaryExpr(val0, '>=', val1);
   }
 
   // Logical Operators
@@ -244,12 +249,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   and(values: string[]): string {
-    return values
-      .filter(x => x)
-      .map(val => {
-        return `(${val})`;
-      })
-      .join(' and ');
+    return this.wrapExpressions(values).join(' and ');
   }
 
   /**
@@ -259,12 +259,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   or(values: string[]): string {
-    return values
-      .filter(x => x)
-      .map(val => {
-        return `(${val})`;
-      })
-      .join(' or ');
+    return this.wrapExpressions(values).join(' or ');
   }
 
   /**
@@ -277,7 +272,7 @@ export default abstract class Handler {
     return ` not ${val0}`;
   }
 
-  // Inclusion Funtions
+  // Inclusion Functions
   /**
    * In Operator
    *
@@ -310,7 +305,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   like(val0: string, val1: string): string {
-    return `${val0} like ${val1}`;
+    return this.binaryExpr(val0, 'like', val1);
   }
 
   /**
@@ -334,7 +329,7 @@ export default abstract class Handler {
   }
 
   /**
-   * Exisis Operator
+   * Exists Operator
    *
    * @param {string} val0
    * @returns {string}
@@ -352,10 +347,10 @@ export default abstract class Handler {
    */
   limit(size: string, index?: string): string {
     const indexStr = index ? `${index}, ` : '';
-    return ` limit ${indexStr}${size}`;
+    return `limit ${indexStr}${size}`;
   }
 
-  // Arithmatic Operators
+  // Arithmetic Operators
   /**
    * Plus Operator
    *
@@ -364,7 +359,7 @@ export default abstract class Handler {
    * @returns {string}
    */
   plus(val0: string, val1: string): string {
-    return `${val0} + ${val1}`;
+    return this.binaryExpr(val0, '+', val1);
   }
 
   /**
@@ -375,34 +370,34 @@ export default abstract class Handler {
    * @returns {string}
    */
   minus(val0: string, val1: string): string {
-    return `${val0} - ${val1}`;
+    return this.binaryExpr(val0, '-', val1);
   }
 
   /**
-   * Multiply Opoerator
+   * Multiply Operator
    *
    * @param {string} val0
    * @param {string} val1
    * @returns {string}
    */
   multiply(val0: string, val1: string): string {
-    return `${val0} * ${val1}`;
+    return this.binaryExpr(val0, '*', val1);
   }
 
   /**
-   * Devide Operator
+   * Divide Operator
    *
    * @param {string} val0
    * @param {string} val1
    * @returns {string}
    */
   devide(val0: string, val1: string): string {
-    return `${val0} / ${val1}`;
+    return this.binaryExpr(val0, '/', val1);
   }
 
   // Sorting Operators
   /**
-   * Acsending Sorting Operator
+   * Ascending Sorting Operator
    *
    * @param {string} val0
    * @returns {string}
@@ -443,7 +438,7 @@ export default abstract class Handler {
   }
 
   /**
-   * Maximum Opoerator
+   * Maximum Operator
    *
    * @param {string} val0
    * @returns {string}

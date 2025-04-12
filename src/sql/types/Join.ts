@@ -1,5 +1,5 @@
 /**
- * Sql Join Types
+ * SQL Join Types
  *
  * @enum {number}
  */

@@ -1,5 +1,5 @@
 /**
- * Sql Command Types
+ * SQL Command Types
  *
  * @enum {number}
  */

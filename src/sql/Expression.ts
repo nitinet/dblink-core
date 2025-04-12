@@ -67,7 +67,7 @@ class Expression implements INode {
 
   // Logical Operators
   /**
-   * And Opoerator
+   * And Operator
    *
    * @param {Expression} operand
    * @returns {Expression}
@@ -117,13 +117,13 @@ class Expression implements INode {
         args.push(...expArgs);
       });
 
-      const val0: string = values[0] ? values[0] : '';
-      const val1: string = values[1] ? values[1] : '';
+      const [val0 = '', val1 = ''] = values;
 
       if (this.operator || this.exps.length > 1) {
         if (!this.operator) this.operator = Operator.And;
 
         switch (this.operator) {
+          // Comparison
           case Operator.Equal:
             query = handler.eq(val0, val1);
             break;
@@ -142,6 +142,7 @@ class Expression implements INode {
           case Operator.GreaterThanEqual:
             query = handler.gteq(val0, val1);
             break;
+          // Logical
           case Operator.And:
             query = handler.and(values);
             break;
@@ -151,6 +152,7 @@ class Expression implements INode {
           case Operator.Not:
             query = handler.not(val0);
             break;
+          // Arithmetic
           case Operator.Plus:
             query = handler.plus(val0, val1);
             break;
@@ -163,6 +165,7 @@ class Expression implements INode {
           case Operator.Devide:
             query = handler.devide(val0, val1);
             break;
+          // Aggregate
           case Operator.Between:
             query = handler.between(values[0], values[1], values[2]);
             break;
@@ -205,6 +208,7 @@ class Expression implements INode {
           case Operator.Avg:
             query = handler.average(val0);
             break;
+          // Default
           default:
             query = handler.and(values);
             break;

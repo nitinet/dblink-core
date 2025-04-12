@@ -1,0 +1,1 @@
+{"version":3,"file":"ResultSet.js","sourceRoot":"","sources":["../../src/model/ResultSet.ts"],"names":[],"mappings":"AAGA,MAAM,CAAC,OAAO,OAAO,SAAS;IAC5B,IAAI,CAA4B;IAChC,KAAK,CAAgB;IAErB,YAAY,OAAkC,EAAE,EAAE,QAAuB,IAAI;QAC3E,IAAI,CAAC,IAAI,GAAG,IAAI,CAAC;QACjB,IAAI,CAAC,KAAK,GAAG,KAAK,CAAC;IACrB,CAAC;CACF"}

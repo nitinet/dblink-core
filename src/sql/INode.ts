@@ -1,11 +1,11 @@
 import Handler from '../Handler.js';
 
 /**
- * Minimal Node element of Sql query
+ * Abstract base class representing a minimal SQL AST node.
+ * Each subclass must implement `eval()` to produce SQL and its parameters.
  *
  * @abstract
- * @class INode
- * @typedef {INode}
+ * @implements {INode}
  */
 abstract class INode {
   /**
