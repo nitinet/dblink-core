@@ -93,7 +93,7 @@ class Collection extends INode {
     // Evaluate based on statement
     else if (this.stat) {
       const { query: stmtQuery, args: stmtArgs } = this.stat.eval(handler);
-      query = stmtQuery;
+      query = `(${stmtQuery})`;
       args = stmtArgs;
     }
     // Evaluate based on join
