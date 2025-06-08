@@ -4,6 +4,18 @@ export default class Handler {
     constructor(config) {
         this.config = config;
     }
+    init() {
+        return Promise.resolve();
+    }
+    getReturnColumnsStr(returnColumns) {
+        return 'return ' + returnColumns.map(col => col.toString()).join(', ');
+    }
+    serializeValue(val, dataType) {
+        return val;
+    }
+    deSerializeValue(val, dataType) {
+        return val;
+    }
     prepareQuery(queryStmt) {
         let query;
         const dataArgs = [];

@@ -29,15 +29,38 @@ export default abstract class Handler {
     this.config = config;
   }
 
-  // Abstract Methods
-
   /**
    * Handler initialisation
    *
-   * @abstract
    * @returns {Promise<void>}
    */
-  abstract init(): Promise<void>;
+  init(): Promise<void> {
+    return Promise.resolve();
+  }
+
+  /**
+   * Creates a returning columns expression for the insert statement
+   *
+   * @param {sql.INode[]} returnColumns
+   * @returns {string}
+   */
+  getReturnColumnsStr(returnColumns: sql.INode[]): string {
+    return 'return ' + returnColumns.map(col => col.toString()).join(', ');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  serializeValue(val: unknown, dataType: IEntityType<DataType>): unknown {
+    // Implement serialization logic based on dataType
+    return val;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  deSerializeValue(val: unknown, dataType: IEntityType<DataType>): unknown {
+    // Implement deserialization logic based on dataType
+    return val;
+  }
+
+  // Abstract Methods
 
   /**
    * Run string query
@@ -124,19 +147,6 @@ export default abstract class Handler {
    * @returns {Promise<void>}
    */
   abstract close(conn: unknown): Promise<void>;
-
-  /**
-   * Creates a returning columns expression for the insert statement
-   *
-   * @abstract
-   * @param {sql.INode[]} returnColumns
-   * @returns {string}
-   */
-  abstract getReturnColumnsStr(returnColumns: sql.INode[]): string;
-
-  abstract serializeValue(val: unknown, dataType: IEntityType<DataType>): unknown;
-
-  abstract deSerializeValue(val: unknown, dataType: IEntityType<DataType>): unknown;
 
   // Utility
   protected prepareQuery(queryStmt: sql.Statement | sql.Statement[]): {
