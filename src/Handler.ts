@@ -15,17 +15,17 @@ export default abstract class Handler {
   /**
    * Handler Connections Configuration
    *
-   * @type {model.IConnectionConfig}
+   * @type {unknown}
    */
-  config: model.IConnectionConfig;
+  config: unknown;
 
   /**
    * Creates an instance of Handler.
    *
    * @constructor
-   * @param {model.IConnectionConfig} config
+   * @param {unknown} config
    */
-  constructor(config: model.IConnectionConfig) {
+  constructor(config: unknown) {
     this.config = config;
   }
 

@@ -28,7 +28,7 @@ class Collection extends INode {
         }
         else if (this.stat) {
             const { query: stmtQuery, args: stmtArgs } = this.stat.eval(handler);
-            query = stmtQuery;
+            query = `(${stmtQuery})`;
             args = stmtArgs;
         }
         else if (this.leftColl && this.rightColl && this.join) {
