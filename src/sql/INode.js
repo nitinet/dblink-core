@@ -1,4 +1,3 @@
-class INode {
-}
+class INode {}
 export default INode;
 //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiSU5vZGUuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJJTm9kZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFTQSxNQUFlLEtBQUs7Q0FTbkI7QUFFRCxlQUFlLEtBQUssQ0FBQyJ9
