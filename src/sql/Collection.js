@@ -1,0 +1,52 @@
+import INode from './INode.js';
+import Join from './types/Join.js';
+class Collection extends INode {
+    colAlias = null;
+    value = null;
+    stat = null;
+    leftColl = null;
+    rightColl = null;
+    join = null;
+    alias = null;
+    resolveJoinType(join) {
+        switch (join) {
+            case Join.LeftJoin:
+                return 'left';
+            case Join.RightJoin:
+                return 'right';
+            case Join.OuterJoin:
+                return 'outer';
+            default:
+                return 'inner';
+        }
+    }
+    eval(handler) {
+        let query = '';
+        let args = [];
+        if (this.value) {
+            query = this.colAlias ? `${this.colAlias}.${this.value}` : this.value;
+        }
+        else if (this.stat) {
+            const { query: stmtQuery, args: stmtArgs } = this.stat.eval(handler);
+            query = `(${stmtQuery})`;
+            args = stmtArgs;
+        }
+        else if (this.leftColl && this.rightColl && this.join) {
+            const { query: leftQuery, args: leftArgs } = this.leftColl.eval(handler);
+            const { query: rightQuery, args: rightArgs } = this.rightColl.eval(handler);
+            const joinType = this.resolveJoinType(this.join);
+            query = `(${leftQuery} ${joinType} join ${rightQuery})`;
+            args.push(...leftArgs);
+            args.push(...rightArgs);
+        }
+        if (!query) {
+            throw new Error('No Collection Found');
+        }
+        if (this.alias) {
+            query = `${query} as ${this.alias}`;
+        }
+        return { query, args };
+    }
+}
+export default Collection;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQ29sbGVjdGlvbi5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIkNvbGxlY3Rpb24udHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQ0EsT0FBTyxLQUFLLE1BQU0sWUFBWSxDQUFDO0FBRS9CLE9BQU8sSUFBSSxNQUFNLGlCQUFpQixDQUFDO0FBTW5DLE1BQU0sVUFBVyxTQUFRLEtBQUs7SUFNNUIsUUFBUSxHQUFrQixJQUFJLENBQUM7SUFPL0IsS0FBSyxHQUFrQixJQUFJLENBQUM7SUFPNUIsSUFBSSxHQUFxQixJQUFJLENBQUM7SUFPOUIsUUFBUSxHQUFzQixJQUFJLENBQUM7SUFPbkMsU0FBUyxHQUFzQixJQUFJLENBQUM7SUFPcEMsSUFBSSxHQUFnQixJQUFJLENBQUM7SUFPekIsS0FBSyxHQUFrQixJQUFJLENBQUM7SUFRcEIsZUFBZSxDQUFDLElBQVU7UUFDaEMsUUFBUSxJQUFJLEVBQUUsQ0FBQztZQUNiLEtBQUssSUFBSSxDQUFDLFFBQVE7Z0JBQ2hCLE9BQU8sTUFBTSxDQUFDO1lBQ2hCLEtBQUssSUFBSSxDQUFDLFNBQVM7Z0JBQ2pCLE9BQU8sT0FBTyxDQUFDO1lBQ2pCLEtBQUssSUFBSSxDQUFDLFNBQVM7Z0JBQ2pCLE9BQU8sT0FBTyxDQUFDO1lBQ2pCO2dCQUNFLE9BQU8sT0FBTyxDQUFDO1FBQ25CLENBQUM7SUFDSCxDQUFDO0lBUUQsSUFBSSxDQUFDLE9BQWdCO1FBQ25CLElBQUksS0FBSyxHQUFXLEVBQUUsQ0FBQztRQUN2QixJQUFJLElBQUksR0FBYyxFQUFFLENBQUM7UUFHekIsSUFBSSxJQUFJLENBQUMsS0FBSyxFQUFFLENBQUM7WUFDZixLQUFLLEdBQUcsSUFBSSxDQUFDLFFBQVEsQ0FBQyxDQUFDLENBQUMsR0FBRyxJQUFJLENBQUMsUUFBUSxJQUFJLElBQUksQ0FBQyxLQUFLLEVBQUUsQ0FBQyxDQUFDLENBQUMsSUFBSSxDQUFDLEtBQUssQ0FBQztRQUN4RSxDQUFDO2FBRUksSUFBSSxJQUFJLENBQUMsSUFBSSxFQUFFLENBQUM7WUFDbkIsTUFBTSxFQUFFLEtBQUssRUFBRSxTQUFTLEVBQUUsSUFBSSxFQUFFLFFBQVEsRUFBRSxHQUFHLElBQUksQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBQ3JFLEtBQUssR0FBRyxJQUFJLFNBQVMsR0FBRyxDQUFDO1lBQ3pCLElBQUksR0FBRyxRQUFRLENBQUM7UUFDbEIsQ0FBQzthQUVJLElBQUksSUFBSSxDQUFDLFFBQVEsSUFBSSxJQUFJLENBQUMsU0FBUyxJQUFJLElBQUksQ0FBQyxJQUFJLEVBQUUsQ0FBQztZQUN0RCxNQUFNLEVBQUUsS0FBSyxFQUFFLFNBQVMsRUFBRSxJQUFJLEVBQUUsUUFBUSxFQUFFLEdBQUcsSUFBSSxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDLENBQUM7WUFDekUsTUFBTSxFQUFFLEtBQUssRUFBRSxVQUFVLEVBQUUsSUFBSSxFQUFFLFNBQVMsRUFBRSxHQUFHLElBQUksQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBQzVFLE1BQU0sUUFBUSxHQUFHLElBQUksQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLElBQUksQ0FBQyxDQUFDO1lBQ2pELEtBQUssR0FBRyxJQUFJLFNBQVMsSUFBSSxRQUFRLFNBQVMsVUFBVSxHQUFHLENBQUM7WUFDeEQsSUFBSSxDQUFDLElBQUksQ0FBQyxHQUFHLFFBQVEsQ0FBQyxDQUFDO1lBQ3ZCLElBQUksQ0FBQyxJQUFJLENBQUMsR0FBRyxTQUFTLENBQUMsQ0FBQztRQUMxQixDQUFDO1FBRUQsSUFBSSxDQUFDLEtBQUssRUFBRSxDQUFDO1lBQ1gsTUFBTSxJQUFJLEtBQUssQ0FBQyxxQkFBcUIsQ0FBQyxDQUFDO1FBQ3pDLENBQUM7UUFFRCxJQUFJLElBQUksQ0FBQyxLQUFLLEVBQUUsQ0FBQztZQUNmLEtBQUssR0FBRyxHQUFHLEtBQUssT0FBTyxJQUFJLENBQUMsS0FBSyxFQUFFLENBQUM7UUFDdEMsQ0FBQztRQUVELE9BQU8sRUFBRSxLQUFLLEVBQUUsSUFBSSxFQUFFLENBQUM7SUFDekIsQ0FBQztDQUNGO0FBRUQsZUFBZSxVQUFVLENBQUMifQ==

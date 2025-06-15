@@ -3,10 +3,8 @@
  */
 export default class ResultSet {
   rows: Record<string, unknown>[];
-  error: string | null;
 
-  constructor(rows: Record<string, unknown>[] = [], error: string | null = null) {
+  constructor(rows: Record<string, unknown>[] = []) {
     this.rows = rows;
-    this.error = error;
   }
 }

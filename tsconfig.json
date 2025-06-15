@@ -3,14 +3,14 @@
     "module": "ESNext",
     "target": "ESNext",
     "moduleResolution": "Node",
-    "sourceMap": true,
+    "inlineSourceMap": true,
     "allowSyntheticDefaultImports": true,
     "removeComments": true,
     "incremental": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "strict": true,
-    "outDir": "dist"
+    "outDir": "./src"
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
