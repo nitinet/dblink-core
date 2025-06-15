@@ -8,11 +8,10 @@
     "test": "jest --coverage",
     "test:watch": "jest --watch",
     "tsc": "tsc",
-    "eslint": "eslint ./src/**/*.ts",
-    "eslint_fix": "eslint --fix ./src/**/*.ts",
+    "eslint": "eslint --fix ./src/**/*.ts",
     "prettier": "prettier -c ./src",
     "prettier_fix": "prettier --write ./src",
-    "build": "run-p tsc eslint prettier"
+    "build": "run-s tsc eslint prettier"
   },
   "author": "",
   "license": "ISC",
