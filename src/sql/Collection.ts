@@ -1,4 +1,5 @@
 import Handler from '../Handler.js';
+import Expression from './Expression.js';
 import INode from './INode.js';
 import Statement from './Statement.js';
 import Join from './types/Join.js';
@@ -51,6 +52,13 @@ class Collection extends INode {
   join: Join | null = null;
 
   /**
+   * Join On Expression
+   *
+   * @type {(Expression | null)}
+   */
+  onExpr: Expression | null = null;
+
+  /**
    * Alias
    *
    * @type {(string | null)}
@@ -97,13 +105,14 @@ class Collection extends INode {
       args = stmtArgs;
     }
     // Evaluate based on join
-    else if (this.leftColl && this.rightColl && this.join) {
+    else if (this.leftColl && this.rightColl && this.join && this.onExpr) {
       const { query: leftQuery, args: leftArgs } = this.leftColl.eval(handler);
       const { query: rightQuery, args: rightArgs } = this.rightColl.eval(handler);
       const joinType = this.resolveJoinType(this.join);
-      query = `(${leftQuery} ${joinType} join ${rightQuery})`;
-      args.push(...leftArgs);
-      args.push(...rightArgs);
+      const { query: onExprQuery, args: onExprArgs } = this.onExpr.eval(handler);
+
+      query = `(${leftQuery} ${joinType} join ${rightQuery} on ${onExprQuery})`;
+      args.push(...leftArgs, ...rightArgs, ...onExprArgs);
     }
 
     if (!query) {
